@@ -11,7 +11,7 @@ namespace Durdans_WebForms_MVP.Pages
 {
     public partial class RegisterPatient : System.Web.UI.Page
     {
-        private ClinicService _service = new ClinicService();
+        private PatientService _patientService = new PatientService();
 
         // Controls declared in .aspx but missing from designer file
         protected global::System.Web.UI.WebControls.TextBox txtName;
@@ -35,7 +35,7 @@ namespace Durdans_WebForms_MVP.Pages
                     ContactNumber = txtContact.Text
                 };
 
-                int newId = _service.RegisterPatient(patient);
+                int newId = _patientService.RegisterPatient(patient);
                 lblMessage.Text = $"Patient registered successfully! Patient ID: {newId}";
                 
                 // Clear form

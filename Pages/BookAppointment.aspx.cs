@@ -11,7 +11,9 @@ namespace Durdans_WebForms_MVP.Pages
 {
     public partial class BookAppointment : System.Web.UI.Page
     {
-        private ClinicService _service = new ClinicService();
+        private AppointmentService _appointmentService = new AppointmentService();
+        private DoctorService _doctorService = new DoctorService();
+        private PatientService _patientService = new PatientService();
 
         // Controls declared in .aspx but missing from designer file
         protected global::System.Web.UI.WebControls.DropDownList ddlPatient;
@@ -30,7 +32,7 @@ namespace Durdans_WebForms_MVP.Pages
 
         private void LoadPatients()
         {
-            ddlPatient.DataSource = _service.GetAllPatients();
+            ddlPatient.DataSource = _patientService.GetAllPatients();
             ddlPatient.DataBind();
             ddlPatient.Items.Insert(0, new ListItem("-- Select Patient --", ""));
         }
@@ -40,7 +42,7 @@ namespace Durdans_WebForms_MVP.Pages
             string specialization = ddlSpecialization.SelectedValue;
             if (!string.IsNullOrEmpty(specialization))
             {
-                var doctors = _service.GetDoctorsBySpecialization(specialization);
+                var doctors = _doctorService.GetDoctorsBySpecialization(specialization);
                 ddlDoctor.DataSource = doctors;
                 ddlDoctor.DataBind();
             }
@@ -64,7 +66,7 @@ namespace Durdans_WebForms_MVP.Pages
                         AppointmentDate = DateTime.Parse(txtDate.Text)
                     };
 
-                    _service.BookAppointment(appointment);
+                    _appointmentService.BookAppointment(appointment);
                     lblMessage.Text = "Appointment Booked Successfully!";
                     lblMessage.CssClass = "text-success";
                 }

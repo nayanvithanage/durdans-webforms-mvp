@@ -26,6 +26,7 @@
                         <asp:ListItem Text="Cardiology" Value="Cardiology" />
                         <asp:ListItem Text="Pediatrics" Value="Pediatrics" />
                         <asp:ListItem Text="Dermatology" Value="Dermatology" />
+                        <asp:ListItem Text="Neurology" Value="Neurology" />
                     </asp:DropDownList>
                 </div>
             </div>

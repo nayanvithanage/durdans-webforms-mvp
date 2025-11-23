@@ -10,7 +10,7 @@ namespace Durdans_WebForms_MVP.Pages
 {
     public partial class Doctors : System.Web.UI.Page
     {
-        private ClinicService _service = new ClinicService();
+        private DoctorService _service = new DoctorService();
 
         // Controls declared in .aspx but missing from designer file
         protected global::System.Web.UI.WebControls.GridView gvDoctors;

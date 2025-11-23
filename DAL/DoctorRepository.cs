@@ -23,5 +23,25 @@ namespace Durdans_WebForms_MVP.DAL
         {
             return SqlHelper.Doctors.FirstOrDefault(d => d.Id == id);
         }
+
+        public int InsertDoctor(Doctor doctor)
+        {
+            doctor.Id = SqlHelper.GetNextId(SqlHelper.Doctors);
+            SqlHelper.Doctors.Add(doctor);
+            return doctor.Id;
+        }
+
+        public void UpdateDoctor(Doctor doctor)
+        {
+            var existing = GetDoctorById(doctor.Id);
+            if (existing != null)
+            {
+                existing.Name = doctor.Name;
+                existing.Specialization = doctor.Specialization;
+                existing.ConsultationFee = doctor.ConsultationFee;
+                existing.AvailableDays = doctor.AvailableDays;
+                existing.AvailableTime = doctor.AvailableTime;
+            }
+        }
     }
 }

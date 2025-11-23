@@ -288,6 +288,7 @@
     <Content Include="packages\Newtonsoft.Json.13.0.3\packageIcon.png" />
     <Content Include="packages\WebGrease.1.6.0\lib\WebGrease.dll" />
     <Content Include="packages\WebGrease.1.6.0\tools\WG.EXE" />
+    <Content Include="Pages\Admin\AddDoctor.aspx" />
     <Content Include="Pages\BookAppointment.aspx" />
     <Content Include="Pages\Doctors.aspx" />
     <Content Include="Pages\RegisterPatient.aspx" />
@@ -486,7 +487,9 @@
       <DependentUpon>About.aspx</DependentUpon>
     </Compile>
     <Compile Include="App_Start\RouteConfig.cs" />
-    <Compile Include="BLL\ClinicService.cs" />
+    <Compile Include="BLL\AppointmentService.cs" />
+    <Compile Include="BLL\DoctorService.cs" />
+    <Compile Include="BLL\PatientService.cs" />
     <Compile Include="Contact.aspx.cs">
       <DependentUpon>Contact.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -512,6 +515,13 @@
     <Compile Include="Models\Doctor.cs" />
     <Compile Include="Models\Patient.cs" />
     <Compile Include="obj\Debug\.NETFramework,Version=v4.7.2.AssemblyAttributes.cs" />
+    <Compile Include="Pages\Admin\AddDoctor.aspx.cs">
+      <DependentUpon>AddDoctor.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Admin\AddDoctor.aspx.designer.cs">
+      <DependentUpon>AddDoctor.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Pages\BookAppointment.aspx.cs">
       <DependentUpon>BookAppointment.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -555,6 +565,11 @@
     <None Include="packages.config" />
     <Content Include="Scripts\jquery-3.7.0.slim.min.map" />
     <Content Include="Scripts\jquery-3.7.0.min.map" />
+    <Content Include="System Design Documents\High Level diagram.md" />
+    <Content Include="System Design Documents\Low Level diagram.md" />
+    <Content Include="System Design Documents\Project Flow Explanation.md" />
+    <Content Include="System Design Documents\Project Structure.md" />
+    <Content Include="System Design Documents\Technical Implementation.md" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
