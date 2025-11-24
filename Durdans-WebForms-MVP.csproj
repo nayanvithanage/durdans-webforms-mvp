@@ -567,9 +567,12 @@
     <Content Include="Scripts\jquery-3.7.0.min.map" />
     <Content Include="System Design Documents\High Level diagram.md" />
     <Content Include="System Design Documents\Low Level diagram.md" />
-    <Content Include="System Design Documents\Project Flow Explanation.md" />
     <Content Include="System Design Documents\Project Structure.md" />
     <Content Include="System Design Documents\Technical Implementation.md" />
+    <Content Include="System Design Documents\Project Flow Explanation - Book Appointment.md" />
+    <Content Include="System Design Documents\Learnings.md" />
+    <Content Include="System Design Documents\Use cases.md" />
+    <Content Include="System Design Documents\User Stories.md" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
