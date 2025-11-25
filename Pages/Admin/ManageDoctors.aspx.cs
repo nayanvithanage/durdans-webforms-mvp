@@ -8,7 +8,7 @@ using Durdans_WebForms_MVP.Models;
 
 namespace Durdans_WebForms_MVP.Pages.Admin
 {
-    public partial class ManageDoctors : System.Web.UI.Page
+    public partial class ManageDoctors : AdminBasePage
     {
         private DoctorService _doctorService;
         private HospitalService _hospitalService;
