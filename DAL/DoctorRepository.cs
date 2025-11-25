@@ -1,81 +1,103 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
-using System.Web;
+using System.Data.Entity;
 using Durdans_WebForms_MVP.Models;
+using Durdans_WebForms_MVP.Data;
 
 namespace Durdans_WebForms_MVP.DAL
 {
-    public class DoctorRepository
+    public class DoctorRepository : IDisposable
     {
-        public List<Doctor> GetAllDoctors()
+        private ClinicDbContext _context;
+
+        public DoctorRepository()
         {
-            DataTable dt = SqlHelper.ExecuteReader("sp_GetAllDoctors");
-            List<Doctor> doctors = new List<Doctor>();
-            foreach (DataRow row in dt.Rows)
-            {
-                doctors.Add(MapToDoctor(row));
-            }
-            return doctors;
+            _context = new ClinicDbContext();
         }
 
-        public List<Doctor> GetDoctorsBySpecialization(string specialization)
+        public List<Doctor> GetAllDoctors()
         {
-            DataTable dt = SqlHelper.ExecuteReader("sp_GetDoctorsBySpecialization", new SqlParameter("@Specialization", specialization));
-            List<Doctor> doctors = new List<Doctor>();
-            foreach (DataRow row in dt.Rows)
-            {
-                doctors.Add(MapToDoctor(row));
-            }
-            return doctors;
+            return _context.Doctors
+                .Include(d => d.Specialization)
+                .Include(d => d.Hospitals)
+                .Include(d => d.Availabilities)
+                .ToList();
+        }
+
+        public List<Doctor> GetDoctorsBySpecialization(int specializationId)
+        {
+            return _context.Doctors
+                .Where(d => d.SpecializationId == specializationId)
+                .Include(d => d.Specialization)
+                .Include(d => d.Hospitals)
+                .Include(d => d.Availabilities)
+                .ToList();
         }
 
         public Doctor GetDoctorById(int id)
         {
-            DataTable dt = SqlHelper.ExecuteReader("sp_GetDoctorById", new SqlParameter("@Id", id));
-            if (dt.Rows.Count > 0)
-            {
-                return MapToDoctor(dt.Rows[0]);
-            }
-            return null;
+            return _context.Doctors
+                .Include(d => d.Specialization)
+                .Include(d => d.Hospitals)
+                .Include(d => d.Availabilities)
+                .Include(d => d.Appointments)
+                .FirstOrDefault(d => d.Id == id);
         }
 
         public int InsertDoctor(Doctor doctor)
         {
-            object result = SqlHelper.ExecuteScalar("sp_InsertDoctor",
-                new SqlParameter("@Name", doctor.Name),
-                new SqlParameter("@Specialization", doctor.Specialization),
-                new SqlParameter("@ConsultationFee", doctor.ConsultationFee),
-                new SqlParameter("@AvailableDays", (object)doctor.AvailableDays ?? DBNull.Value),
-                new SqlParameter("@AvailableTime", (object)doctor.AvailableTime ?? DBNull.Value));
-            
-            return Convert.ToInt32(result);
+            _context.Doctors.Add(doctor);
+            _context.SaveChanges();
+            return doctor.Id;
+        }
+
+        public int InsertDoctor(Doctor doctor, List<int> hospitalIds)
+        {
+            if (hospitalIds != null && hospitalIds.Any())
+            {
+                doctor.Hospitals = new List<Hospital>();
+                foreach (var id in hospitalIds)
+                {
+                    var hospital = _context.Hospitals.Find(id);
+                    if (hospital != null)
+                    {
+                        doctor.Hospitals.Add(hospital);
+                    }
+                }
+            }
+
+            _context.Doctors.Add(doctor);
+            _context.SaveChanges();
+            return doctor.Id;
         }
 
         public void UpdateDoctor(Doctor doctor)
         {
-            SqlHelper.ExecuteNonQuery("sp_UpdateDoctor",
-                new SqlParameter("@Id", doctor.Id),
-                new SqlParameter("@Name", doctor.Name),
-                new SqlParameter("@Specialization", doctor.Specialization),
-                new SqlParameter("@ConsultationFee", doctor.ConsultationFee),
-                new SqlParameter("@AvailableDays", (object)doctor.AvailableDays ?? DBNull.Value),
-                new SqlParameter("@AvailableTime", (object)doctor.AvailableTime ?? DBNull.Value));
+            var existingDoctor = _context.Doctors.Find(doctor.Id);
+            if (existingDoctor != null)
+            {
+                existingDoctor.Name = doctor.Name;
+                existingDoctor.SpecializationId = doctor.SpecializationId;
+                existingDoctor.ConsultationFee = doctor.ConsultationFee;
+                
+                _context.SaveChanges();
+            }
         }
 
-        private Doctor MapToDoctor(DataRow row)
+        public void DeleteDoctor(int id)
         {
-            return new Doctor
+            var doctor = _context.Doctors.Find(id);
+            if (doctor != null)
             {
-                Id = Convert.ToInt32(row["Id"]),
-                Name = row["Name"].ToString(),
-                Specialization = row["Specialization"].ToString(),
-                ConsultationFee = Convert.ToDecimal(row["ConsultationFee"]),
-                AvailableDays = row["AvailableDays"] != DBNull.Value ? row["AvailableDays"].ToString() : null,
-                AvailableTime = row["AvailableTime"] != DBNull.Value ? row["AvailableTime"].ToString() : null
-            };
+                _context.Doctors.Remove(doctor);
+                _context.SaveChanges();
+            }
+        }
+
+        public void Dispose()
+        {
+            _context?.Dispose();
         }
     }
 }

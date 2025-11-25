@@ -1,56 +1,68 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
-using System.Web;
+using System.Data.Entity;
 using Durdans_WebForms_MVP.Models;
+using Durdans_WebForms_MVP.Data;
 
 namespace Durdans_WebForms_MVP.DAL
 {
-    public class PatientRepository
+    public class PatientRepository : IDisposable
     {
+        private ClinicDbContext _context;
+
+        public PatientRepository()
+        {
+            _context = new ClinicDbContext();
+        }
+
         public int InsertPatient(Patient patient)
         {
-            object result = SqlHelper.ExecuteScalar("sp_InsertPatient",
-                new SqlParameter("@Name", patient.Name),
-                new SqlParameter("@DateOfBirth", patient.DateOfBirth),
-                new SqlParameter("@ContactNumber", patient.ContactNumber));
-            return Convert.ToInt32(result);
+            _context.Patients.Add(patient);
+            _context.SaveChanges();
+            return patient.Id;
         }
 
         public List<Patient> GetAllPatients()
         {
-            DataTable dt = SqlHelper.ExecuteReader("sp_GetAllPatients");
-            List<Patient> patients = new List<Patient>();
-            foreach (DataRow row in dt.Rows)
-            {
-                patients.Add(new Patient
-                {
-                    Id = Convert.ToInt32(row["Id"]),
-                    Name = row["Name"].ToString(),
-                    DateOfBirth = Convert.ToDateTime(row["DateOfBirth"]),
-                    ContactNumber = row["ContactNumber"].ToString()
-                });
-            }
-            return patients;
+            return _context.Patients
+                .Include(p => p.Appointments)
+                .ToList();
         }
 
         public Patient GetPatientById(int id)
         {
-            DataTable dt = SqlHelper.ExecuteReader("sp_GetPatientById", new SqlParameter("@Id", id));
-            if (dt.Rows.Count > 0)
+            return _context.Patients
+                .Include(p => p.Appointments)
+                .FirstOrDefault(p => p.Id == id);
+        }
+
+        public void UpdatePatient(Patient patient)
+        {
+            var existingPatient = _context.Patients.Find(patient.Id);
+            if (existingPatient != null)
             {
-                DataRow row = dt.Rows[0];
-                return new Patient
-                {
-                    Id = Convert.ToInt32(row["Id"]),
-                    Name = row["Name"].ToString(),
-                    DateOfBirth = Convert.ToDateTime(row["DateOfBirth"]),
-                    ContactNumber = row["ContactNumber"].ToString()
-                };
+                existingPatient.Name = patient.Name;
+                existingPatient.DateOfBirth = patient.DateOfBirth;
+                existingPatient.ContactNumber = patient.ContactNumber;
+                
+                _context.SaveChanges();
             }
-            return null;
+        }
+
+        public void DeletePatient(int id)
+        {
+            var patient = _context.Patients.Find(id);
+            if (patient != null)
+            {
+                _context.Patients.Remove(patient);
+                _context.SaveChanges();
+            }
+        }
+
+        public void Dispose()
+        {
+            _context?.Dispose();
         }
     }
 }

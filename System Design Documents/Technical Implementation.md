@@ -99,75 +99,143 @@ For an enterprise-grade Web Forms application in a hospital setting, the standar
     *   **Controls**: `asp:GridView` (Display list), `asp:TextBox` (Search filter).
     *   **Logic**: Filter using LINQ: `context.Hospitals.Where(h => h.Name.Contains(searchTerm))`.
 
-### 6.3 Doctor Management (One page?)
-*   **Doctor Registry (`AddDoctor.aspx`)**
-    *   **Controls**: `asp:DropDownList` (Specialization), `asp:TextBox` (Fee), `asp:CheckBoxList` (Hospital)
-    *   **Database**: `DoctorRepository.InsertDoctor()` → `context.SaveChanges()`.
-    *   **Many-to-Many**: Doctor-Hospital relationship managed via navigation properties.
-*   **Doctor Search (`DoctorList.aspx`)**
-    *   **Controls**: `asp:GridView` (Display list), `asp:TextBox` (Search filter).
-    *   **Logic**: Filter using LINQ: `context.Doctors.Where(d => d.Name.Contains(searchTerm))`.
-    **Availability Settings**
-    *   **Controls**: `asp:CheckBoxList` (Days of Week), `asp:DropDownList` (Time Slots), `asp:DropDownList` (Hospital), `asp:TextBox` (Bookings per Time Slot limit).
-    *   **Database**: `AvailabilityRepository.InsertAvailability()` → `context.SaveChanges()`.
-    *   **Logic**: `AvailabilityRepository.InsertAvailability()` is called on `btnSubmitAvailability_Click` event. 
-    *   **Workflow**: 
-        1. this will add the availability record to the availablity list below the form. 
-        2. availability list will have the following columns: 
-            1. Doctor Name 
-            2. Hospital Name
-            3. Day of Week
-            4. Time Slot
-            5. Actions (Edit, Delete, Save)
-        3. we can remove the record from the list using `btnRemoveAvailability_Click` event in the availability list.
-        4. we can change the record from the list using `btnSaveAvailability_Click` event in the availability list.
-        5. Timeslots dropdown will be shown 12AM to 12PM to select the time slot when setting the availability. (every 15 minutes, one hour slots. ex:6:15PM-7:15PM)
+### 6.3 Doctor Management (`AddDoctor.aspx` - Single Page with Two Sections)
 
-### 6.4 Appointment Scheduling 
-*   **Booking Interface (`BookAppointment.aspx`)**
-    *   **Workflow**:
-        1.  Select Specialization (`AutoPostBack="true"` triggers reload).
-        2.  Select Doctor (Populated via LINQ: `context.Doctors.Where(d => d.Specialization == selected)`).
-        3.  Select Date (`asp:Calendar` with `OnDayRender` to disable past dates).
-        4.  Select Hospital (Populated from Doctor's navigation property: `doctor.Hospitals`).
-        5.  Select Time Slot (Check existing appointments via LINQ to show available slots). 
-            *   **Implementation**: Use `asp:Repeater` to display time slots as color-coded boxes (every 15 minutes, one hour slots. ex:6:15PM-7:15PM)
-            *   **Color Coding**:
-                *   **Green**: Available (no bookings)
-                *   **Amber**: Almost Full (bookings < max limit)
-                *   **Red**: Unavailable (bookings >= max limit or doctor not available)
-            *   **LINQ Logic**:
-                ```csharp
-                // Get doctor's availability for selected day
-                var availability = context.DoctorAvailabilities
-                    .FirstOrDefault(a => a.DoctorId == doctorId 
-                        && a.HospitalId == hospitalId 
-                        && a.DayOfWeek == selectedDate.DayOfWeek.ToString());
-                
-                // Get existing appointments
-                var existingAppointments = context.Appointments
-                    .Where(a => a.DoctorId == doctorId 
-                        && a.HospitalId == hospitalId
-                        && DbFunctions.TruncateTime(a.AppointmentDate) == selectedDate.Date)
-                    .ToList();
-                
-                // Generate time slots and calculate status
-                var slots = GenerateTimeSlots(availability.StartTime, availability.EndTime);
-                foreach (var slot in slots) {
-                    var bookingsInSlot = existingAppointments.Count(a => 
-                        a.AppointmentTime >= slot.StartTime && 
-                        a.AppointmentTime < slot.EndTime);
-                    
-                    slot.Status = bookingsInSlot == 0 ? "Available" : 
-                                  bookingsInSlot < availability.MaxBookingsPerSlot ? "AlmostFull" : 
-                                  "Unavailable";
-                }
-                ```
-            *   **Required Entity**: `DoctorAvailability` with properties: `DoctorId`, `HospitalId`, `DayOfWeek`, `StartTime`, `EndTime`, `MaxBookingsPerSlot`.
-        6.  All the available timeslots will be shown based on the doctor's availability (Date, Hospital, Doctor, Booked Appointments).
-        7.  If booked appointments are exceeded for the time slot, the time slot will be shown in Amber.
-        **Logic:**: 
-        1. An Admin can Book an appointment for a patient using the `BookAppointment.aspx` page. BookingType will be admin, and the booked by will be the admin's login name.
+**Section 1: Doctor Registration**
+*   **Controls**: 
+    *   `asp:TextBox` (Doctor Name)
+    *   `asp:DropDownList` (Specialization)
+    *   `asp:TextBox` (Consultation Fee)
+    *   `asp:CheckBoxList` (Assign Hospitals - for many-to-many relationship)
+    *   `asp:Button` (Register Doctor)
+*   **Database**: `DoctorRepository.InsertDoctor()` → `context.SaveChanges()`.
+*   **Many-to-Many**: Doctor-Hospital relationship managed via navigation properties and CheckBoxList selection.
+*   **Validation**: RequiredFieldValidator for Name, Specialization, Fee; RangeValidator for Fee (1-100,000).
+
+**Section 2: Doctor Availability Settings** (Below Registration Section)
+*   **Controls**: 
+    *   `asp:DropDownList` (Select Doctor - populated from registered doctors)
+    *   `asp:DropDownList` (Select Hospital - filtered by selected doctor's hospitals)
+    *   `asp:CheckBoxList` (Days of Week - Monday to Sunday)
+    *   `asp:DropDownList` (Start Time - 12:00 AM to 11:45 PM, 15-minute intervals)
+    *   `asp:DropDownList` (End Time - 12:00 AM to 11:45 PM, 15-minute intervals)
+    *   `asp:TextBox` (Max Bookings Per Slot - default: 3, range: 1-10)
+    *   `asp:Button` (Add Availability)
+    *   `asp:GridView` (Display and manage availability schedules)
+*   **Database**: `AvailabilityRepository.InsertAvailability()` → `context.SaveChanges()`.
+*   **GridView Columns**:
+    1. Doctor Name (ReadOnly)
+    2. Hospital Name (ReadOnly)
+    3. Day of Week (ReadOnly)
+    4. Time Slot (ReadOnly, format: "HH:MM AM/PM - HH:MM AM/PM")
+    5. Max Bookings (Editable)
+    6. Actions (Edit, Delete buttons)
+*   **Workflow**: 
+    1. Admin selects a doctor from dropdown (triggers AutoPostBack to load doctor's hospitals)
+    2. Admin selects hospital, days of week, time range, and max bookings
+    3. Click "Add Availability" creates availability records for each selected day
+    4. GridView displays all availability schedules for selected doctor
+    5. Admin can Edit max bookings or Delete availability records via GridView
+    6. Time slots are generated in 15-minute intervals (e.g., 6:15 PM - 7:15 PM represents 1-hour slots)
+
+### 6.4 Appointment Scheduling (`BookAppointment.aspx` - Two-Panel Layout)
+
+**Left Panel: Appointment Details Selection**
+*   **Controls**:
+    *   `asp:DropDownList` (Select Patient)
+    *   `asp:DropDownList` (Specialization - with `AutoPostBack="true"`)
+    *   `asp:DropDownList` (Select Doctor - populated based on specialization)
+    *   `asp:DropDownList` (Select Hospital - populated from selected doctor's hospitals)
+    *   `asp:Calendar` (Select Date - with `OnDayRender` to disable past dates)
+    *   `asp:Button` (Load Available Time Slots)
+*   **Validation**: RequiredFieldValidator for Patient, Doctor, Hospital.
+
+**Right Panel: Time Slot Selection**
+*   **Controls**:
+    *   `asp:Repeater` (Display color-coded time slots)
+    *   `asp:HiddenField` (Store selected time slot value)
+    *   `asp:Label` (Display selected slot confirmation)
+    *   `asp:Button` (Confirm Booking)
+*   **Time Slot Display**:
+    *   **Format**: Grid layout with LinkButtons (e.g., "06:15 PM - 07:15 PM")
+    *   **Color Coding** (CSS classes):
+        *   **Green** (`time-slot-available`): No bookings, fully available
+        *   **Amber** (`time-slot-almost-full`): Bookings < max limit, shows count (e.g., "Almost Full (2/3)")
+        *   **Red** (`time-slot-unavailable`): Bookings >= max limit or doctor not available, disabled
+    *   **Interaction**: Clickable slots trigger `ItemCommand` event, selected slot highlighted with blue border
+
+**Workflow**:
+1.  Select Patient from dropdown
+2.  Select Specialization (AutoPostBack loads matching doctors)
+3.  Select Doctor (AutoPostBack loads doctor's hospitals)
+4.  Select Hospital
+5.  Select Date from Calendar (past dates are grayed out and disabled)
+6.  Click "Load Available Time Slots" button
+7.  System queries `DoctorAvailability` for selected day of week
+8.  System queries existing `Appointments` for selected date/doctor/hospital
+9.  Time slots generated in 15-minute intervals (1-hour slots: 6:15PM-7:15PM)
+10. Each slot color-coded based on booking count vs. max limit
+11. User clicks desired time slot (stored in HiddenField)
+12. Click "Confirm Booking" to create appointment
+
+**LINQ Logic**:
+```csharp
+// Get doctor's availability for selected day
+var availability = context.DoctorAvailabilities
+    .FirstOrDefault(a => a.DoctorId == doctorId 
+        && a.HospitalId == hospitalId 
+        && a.DayOfWeek == selectedDate.DayOfWeek.ToString());
+
+// Get existing appointments
+var existingAppointments = context.Appointments
+    .Where(a => a.DoctorId == doctorId 
+        && a.HospitalId == hospitalId
+        && DbFunctions.TruncateTime(a.AppointmentDate) == selectedDate.Date)
+    .ToList();
+
+// Generate time slots and calculate status
+var slots = GenerateTimeSlots(availability.StartTime, availability.EndTime);
+foreach (var slot in slots) {
+    var bookingsInSlot = existingAppointments.Count(a => a.AppointmentTime == slot.StartTime);
+    
+    slot.Status = bookingsInSlot == 0 ? "Available" : 
+                  bookingsInSlot < availability.MaxBookingsPerSlot ? $"Almost Full ({bookingsInSlot}/{availability.MaxBookingsPerSlot})" : 
+                  "Unavailable";
+    slot.CssClass = bookingsInSlot == 0 ? "time-slot-available" :
+                    bookingsInSlot < availability.MaxBookingsPerSlot ? "time-slot-almost-full" :
+                    "time-slot-unavailable";
+}
+
+// In one time slot, there can be multiple bookings for different patients but the total bookings should not exceed the max bookings per slot.
+// If the total bookings exceed the max bookings per slot, the slot should be marked as unavailable.
+
+### 6.5 User Authentication & Authorization
+*   **Login Page (`Login.aspx`)**:
+    *   **Controls**: `asp:TextBox` (Username, Password), `asp:Button` (Login).
+    *   **Logic**: Validate credentials against `Users` table. Store `User` object or ID/Role in Session.
+*   **Registration Page (`Register.aspx`)**:
+    *   **Controls**: `asp:TextBox` (Username, Password, Email), `asp:DropDownList` (Role - hidden/default for public users).
+    *   **Logic**: Create new `User` entity. Hash password before saving.
+*   **Role-Based Booking Logic**:
+    *   **Admin**: When booking, the `Patient` dropdown is visible and enabled. Admin selects the patient.
+    *   **Patient (User)**: When booking, the `Patient` dropdown is hidden or disabled. The system automatically assigns the logged-in user's Patient ID.
+
+```csharp
+// Example Logic in BookAppointment.aspx.cs
+if (Session["UserRole"] == "Admin") {
+    ddlPatient.Visible = true;
+} else {
+    ddlPatient.Visible = false;
+    int currentUserId = (int)Session["UserId"];
+    // Logic to find PatientId from UserId
+}
+```
+```
+
+**Admin Booking**: 
+*   Admin can book appointments for patients
+*   `BookingType` = "Admin"
+*   `BookedBy` = Admin's login username (from session/authentication)
         2. A Patient can Book an appointment for themselves using the `BookAppointment.aspx` page. BookingType will be patient, and the booked by will be the patient's login name.
     *   **Concurrency Control**: Use EF transactions (`context.Database.BeginTransaction()`) to prevent double-booking.
     *   **Validation**: Check for conflicts before `SaveChanges()`.
