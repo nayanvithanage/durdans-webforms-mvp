@@ -1,21 +1,163 @@
-﻿/* Wrapping element */
-/* Set some basic padding to keep content from hitting the edges */
-.body-content {
-    margin-top: 15px;
-    padding-left: 15px;
-    padding-right: 15px;
+﻿/* AdminLTE Custom Styles for Durdans Clinic */
+
+/* Override AdminLTE defaults if needed */
+body {
+    font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
-/* Set widths on the form inputs since otherwise they're 100% wide */
-input,
-select,
-textarea {
-    max-width: 280px;
+/* Custom card styling */
+.card {
+    box-shadow: 0 0 1px rgba(0, 0, 0, 0.125), 0 1px 3px rgba(0, 0, 0, 0.2);
+    margin-bottom: 1rem;
 }
 
-/* Responsive: Portrait tablets and up */
-@media screen and (min-width: 768px) {
-    .body-content {
-        padding: 0;
+.card-header {
+    font-weight: 600;
+}
+
+/* Form styling improvements */
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Button improvements */
+.btn {
+    font-weight: 400;
+    border-radius: 0.25rem;
+}
+
+/* Table improvements */
+.table {
+    font-size: 0.875rem;
+}
+
+.table thead th {
+    font-weight: 600;
+    border-bottom: 2px solid #dee2e6;
+}
+
+/* Alert improvements */
+.alert {
+    border-radius: 0.25rem;
+    border: none;
+}
+
+/* Pagination improvements */
+.pagination {
+    margin-bottom: 0;
+}
+
+.page-link {
+    color: #007bff;
+}
+
+.page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+/* Sidebar improvements */
+.sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+/* Content area improvements */
+.content-wrapper {
+    background-color: #f4f6f9;
+}
+
+.content-header h1 {
+    font-size: 1.75rem;
+    font-weight: 400;
+}
+
+/* Breadcrumb improvements */
+.breadcrumb {
+    background-color: transparent;
+    padding: 0;
+    margin-bottom: 0;
+}
+
+/* Responsive improvements */
+@media (max-width: 767.98px) {
+    .content-header h1 {
+        font-size: 1.5rem;
     }
+    
+    .card {
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Custom Durdans Clinic branding */
+.brand-text {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+/* Loading spinner (if needed) */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.15em;
+}
+
+/* Time slot styling (for BookAppointment page) */
+.time-slots-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.time-slot {
+    display: block;
+    padding: 15px 10px;
+    text-align: center;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.time-slot-available {
+    background-color: #d4edda;
+    color: #155724;
+    border-color: #c3e6cb;
+}
+
+.time-slot-available:hover {
+    background-color: #28a745;
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.time-slot-almost-full {
+    background-color: #fff3cd;
+    color: #856404;
+    border-color: #ffeaa7;
+}
+
+.time-slot-almost-full:hover {
+    background-color: #ffc107;
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.time-slot-unavailable {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-color: #f5c6cb;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.time-slot.selected {
+    border: 3px solid #007bff;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
 }

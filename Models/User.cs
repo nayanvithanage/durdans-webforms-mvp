@@ -24,5 +24,8 @@ namespace Durdans_WebForms_MVP.Models
         public string Email { get; set; }
 
         public DateTime CreatedDate { get; set; }
+
+        // Navigation property to Patient (one-to-one optional)
+        public virtual Patient Patient { get; set; }
     }
 }

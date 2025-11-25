@@ -17,3 +17,15 @@ Update-Database -TargetMigration:0
 
 ## To see migration history
 Get-Migrations
+
+## Step 4: Add User Table Migration (for Authentication)
+Add-Migration AddUsersTable
+
+## Step 5: Update Database with User Table
+Update-Database -Verbose
+
+## Step 6: Add User-Patient Linking (UserId to Patient Table)
+Add-Migration AddUserIdToPatient
+
+## Step 7: Update Database with User-Patient Link
+Update-Database -Verbose

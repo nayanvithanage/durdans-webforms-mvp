@@ -27,6 +27,7 @@ namespace Durdans_WebForms_MVP.DAL
         {
             return _context.Patients
                 .Include(p => p.Appointments)
+                .Include(p => p.User)
                 .ToList();
         }
 
@@ -35,6 +36,13 @@ namespace Durdans_WebForms_MVP.DAL
             return _context.Patients
                 .Include(p => p.Appointments)
                 .FirstOrDefault(p => p.Id == id);
+        }
+
+        public Patient GetPatientByUserId(int userId)
+        {
+            return _context.Patients
+                .Include(p => p.Appointments)
+                .FirstOrDefault(p => p.UserId == userId);
         }
 
         public void UpdatePatient(Patient patient)
