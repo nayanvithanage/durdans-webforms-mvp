@@ -1,0 +1,19 @@
+# Entity Framework 6.x Migration Commands for Visual Studio Package Manager Console
+
+## Step 1: Enable Migrations
+Enable-Migrations -ContextTypeName Durdans_WebForms_MVP.Data.ClinicDbContext
+
+## Step 2: Add Initial Migration
+Add-Migration InitialCreate
+
+## Step 3: Update Database (Create Schema)
+Update-Database -Verbose
+
+## Optional: View SQL that will be executed
+Update-Database -Script
+
+## If you need to rollback
+Update-Database -TargetMigration:0
+
+## To see migration history
+Get-Migrations

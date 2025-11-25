@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Durdans_WebForms_MVP.Models
 {
-    public class Appointment
+    public class DoctorAvailability
     {
         [Key]
         public int Id { get; set; }
@@ -13,29 +13,24 @@ namespace Durdans_WebForms_MVP.Models
         public int DoctorId { get; set; }
 
         [Required]
-        public int PatientId { get; set; }
-
-        [Required]
         public int HospitalId { get; set; }
 
         [Required]
-        public DateTime AppointmentDate { get; set; }
+        [StringLength(20)]
+        public string DayOfWeek { get; set; } // "Monday", "Tuesday", etc.
 
         [Required]
-        public TimeSpan AppointmentTime { get; set; }
+        public TimeSpan StartTime { get; set; } // e.g., 09:00
 
-        [StringLength(50)]
-        public string BookingType { get; set; } // "Admin" or "Patient"
+        [Required]
+        public TimeSpan EndTime { get; set; } // e.g., 17:00
 
-        [StringLength(100)]
-        public string BookedBy { get; set; } // Username of who booked
+        [Required]
+        public int MaxBookingsPerSlot { get; set; } // e.g., 3
 
         // Navigation properties
         [ForeignKey("DoctorId")]
         public virtual Doctor Doctor { get; set; }
-
-        [ForeignKey("PatientId")]
-        public virtual Patient Patient { get; set; }
 
         [ForeignKey("HospitalId")]
         public virtual Hospital Hospital { get; set; }
