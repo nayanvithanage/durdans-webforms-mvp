@@ -230,8 +230,6 @@ if (Session["UserRole"] == "Admin") {
     // Logic to find PatientId from UserId
 }
 ```
-```
-
 **Admin Booking**: 
 *   Admin can book appointments for patients
 *   `BookingType` = "Admin"
