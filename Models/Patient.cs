@@ -20,7 +20,11 @@ namespace Durdans_WebForms_MVP.Models
         [StringLength(20)]
         public string ContactNumber { get; set; }
 
+        // Link to User account (for patients who have user accounts)
+        public int? UserId { get; set; }
+
         // Navigation properties
+        public virtual User User { get; set; }
         public virtual ICollection<Appointment> Appointments { get; set; }
 
         public Patient()

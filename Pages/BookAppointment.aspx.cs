@@ -8,7 +8,7 @@ using Durdans_WebForms_MVP.Models;
 
 namespace Durdans_WebForms_MVP.Pages
 {
-    public partial class BookAppointment : System.Web.UI.Page
+    public partial class BookAppointment : BasePage
     {
         private AppointmentService _appointmentService;
         private DoctorService _doctorService;
@@ -24,9 +24,42 @@ namespace Durdans_WebForms_MVP.Pages
             _hospitalService = new HospitalService();
             _specializationService = new SpecializationService();
 
+            // Configure patient validator based on user role (for both initial load and postback)
+            if (IsAdmin)
+            {
+                rfvPatient.Enabled = true;
+            }
+            else
+            {
+                rfvPatient.Enabled = false;
+            }
+
             if (!IsPostBack)
             {
-                LoadPatients();
+                // Check user role and configure patient selection accordingly
+                if (IsAdmin)
+                {
+                    // Admin can select any patient
+                    ddlPatient.Visible = true;
+                    lblPatient.Visible = true;
+                    lblPatient.Text = "Select Patient";
+                    pnlPatientInfo.Visible = false;
+                    rfvPatient.Enabled = true;  // Enable validator for admin
+                    LoadPatients();
+                }
+                else
+                {
+                    // Regular user (Patient) - show their patient information
+                    ddlPatient.Visible = false;
+                    lblPatient.Visible = true;
+                    lblPatient.Text = "Patient Information";
+                    pnlPatientInfo.Visible = true;
+                    rfvPatient.Enabled = false;  // Disable validator for normal users
+
+                    // Load and display logged-in user's patient information
+                    LoadCurrentUserPatient();
+                }
+
                 LoadSpecializations();
             }
         }
@@ -42,6 +75,43 @@ namespace Durdans_WebForms_MVP.Pages
             catch (Exception ex)
             {
                 lblMessage.Text = "Error loading patients: " + ex.Message;
+                lblMessage.CssClass = "text-danger alert alert-danger";
+            }
+        }
+
+        private void LoadCurrentUserPatient()
+        {
+            try
+            {
+                if (CurrentUserId.HasValue)
+                {
+                    var patient = _patientService.GetPatientByUserId(CurrentUserId.Value);
+                    
+                    if (patient != null)
+                    {
+                        lblPatientName.Text = patient.Name;
+                        lblPatientContact.Text = patient.ContactNumber;
+                        lblPatientDOB.Text = patient.DateOfBirth.ToString("dd MMM yyyy");
+                    }
+                    else
+                    {
+                        // Patient record not found
+                        pnlPatientInfo.Visible = false;
+                        lblMessage.Text = "Patient record not found. Please contact administrator to create your patient profile.";
+                        lblMessage.CssClass = "text-danger alert alert-danger";
+                    }
+                }
+                else
+                {
+                    pnlPatientInfo.Visible = false;
+                    lblMessage.Text = "User information not available. Please log in again.";
+                    lblMessage.CssClass = "text-danger alert alert-danger";
+                }
+            }
+            catch (Exception ex)
+            {
+                pnlPatientInfo.Visible = false;
+                lblMessage.Text = "Error loading patient information: " + ex.Message;
                 lblMessage.CssClass = "text-danger alert alert-danger";
             }
         }
@@ -264,15 +334,49 @@ namespace Durdans_WebForms_MVP.Pages
                         return;
                     }
 
+                    // Determine patient ID based on user role
+                    int patientId;
+                    string bookingType;
+                    string bookedBy = CurrentUsername; // From BasePage
+
+                    if (IsAdmin)
+                    {
+                        // Admin selects patient from dropdown
+                        if (string.IsNullOrEmpty(ddlPatient.SelectedValue))
+                        {
+                            lblMessage.Text = "Please select a patient.";
+                            lblMessage.CssClass = "text-warning alert alert-warning";
+                            return;
+                        }
+                        patientId = int.Parse(ddlPatient.SelectedValue);
+                        bookingType = "Admin";
+                    }
+                    else
+                    {
+                        // Regular user books for themselves
+                        // Get patient by UserId (proper foreign key relationship)
+                        var patient = _patientService.GetPatientByUserId(CurrentUserId.Value);
+                        
+                        if (patient == null)
+                        {
+                            lblMessage.Text = "Patient record not found. Please contact administrator to create your patient profile.";
+                            lblMessage.CssClass = "text-danger alert alert-danger";
+                            return;
+                        }
+                        
+                        patientId = patient.Id;
+                        bookingType = "Patient";
+                    }
+
                     var appointment = new Appointment
                     {
-                        PatientId = int.Parse(ddlPatient.SelectedValue),
+                        PatientId = patientId,
                         DoctorId = int.Parse(ddlDoctor.SelectedValue),
                         HospitalId = int.Parse(ddlHospital.SelectedValue),
                         AppointmentDate = calAppointmentDate.SelectedDate,
                         AppointmentTime = TimeSpan.Parse(hfSelectedTimeSlot.Value),
-                        BookingType = "Admin", // Can be changed based on logged-in user role
-                        BookedBy = "AdminUser" // Replace with actual logged-in username
+                        BookingType = bookingType,
+                        BookedBy = bookedBy
                     };
 
                     _appointmentService.BookAppointment(appointment);
@@ -302,7 +406,12 @@ namespace Durdans_WebForms_MVP.Pages
 
         private void ClearForm()
         {
-            ddlPatient.SelectedIndex = 0;
+            // Only clear patient dropdown for admin users
+            if (IsAdmin && ddlPatient.Visible)
+            {
+                ddlPatient.SelectedIndex = 0;
+            }
+            
             ddlSpecialization.SelectedIndex = 0;
             ddlDoctor.Items.Clear();
             ddlDoctor.Items.Insert(0, new ListItem("-- Select Doctor --", ""));
