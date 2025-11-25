@@ -46,9 +46,9 @@
                 </button>
                 <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item"><a class="nav-link" runat="server" href="~/Pages/Doctors.aspx">Doctors</a></li>
-                        <li class="nav-item"><a class="nav-link" runat="server" href="~/Pages/Admin/AddDoctor.aspx">Add Doctor</a></li>
-                        <li class="nav-item"><a class="nav-link" runat="server" href="~/Pages/RegisterPatient.aspx">Register Patient</a></li>
+                        <li class="nav-item"><a class="nav-link" runat="server" href="~/Pages/Admin/ManageDoctors.aspx">ManageDoctors</a></li>
+                        <li class="nav-item"><a class="nav-link" runat="server" href="~/Pages/Admin/ManageHospital.aspx">Manage Hospital</a></li>
+                        <li class="nav-item"><a class="nav-link" runat="server" href="~/Pages/Admin/RegisterPatient.aspx">Register Patient</a></li>
                         <li class="nav-item"><a class="nav-link" runat="server" href="~/Pages/BookAppointment.aspx">Book Appointment</a></li>
                     </ul>
                 </div>

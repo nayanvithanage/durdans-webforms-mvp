@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="packages\EntityFramework.6.5.1\build\EntityFramework.props" Condition="Exists('packages\EntityFramework.6.5.1\build\EntityFramework.props')" />
   <Import Project="packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -44,6 +45,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>packages\EntityFramework.6.5.1\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>packages\EntityFramework.6.5.1\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System" />
@@ -122,6 +129,11 @@
     <Content Include="Default.aspx" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
+    <Content Include="Pages\Admin\ManageDoctors.aspx" />
+    <Content Include="Pages\Admin\ManageHospital.aspx" />
+    <Content Include="Pages\Admin\ManageSpecializations.aspx" />
+    <Content Include="Pages\Admin\RegisterPatient.aspx" />
+    <Content Include="Pages\BookAppointment.aspx" />
     <Content Include="obj\Debug\Durdans-WebForms-MVP.csproj.FileListAbsolute.txt" />
     <Content Include="packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll" />
     <Content Include="packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.pdb" />
@@ -289,10 +301,10 @@
     <Content Include="packages\Newtonsoft.Json.13.0.3\packageIcon.png" />
     <Content Include="packages\WebGrease.1.6.0\lib\WebGrease.dll" />
     <Content Include="packages\WebGrease.1.6.0\tools\WG.EXE" />
-    <Content Include="Pages\Admin\AddDoctor.aspx" />
+    <Content Include="Pages\Admin\AddHospital.aspx" />
+    <Content Include="Pages\Admin\ManageSpecializations.aspx" />
     <Content Include="Pages\BookAppointment.aspx" />
-    <Content Include="Pages\Doctors.aspx" />
-    <Content Include="Pages\RegisterPatient.aspx" />
+    <Content Include="Pages\Admin\RegisterPatient.aspx" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.esm.js" />
@@ -496,7 +508,9 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="BLL\AppointmentService.cs" />
     <Compile Include="BLL\DoctorService.cs" />
+    <Compile Include="BLL\HospitalService.cs" />
     <Compile Include="BLL\PatientService.cs" />
+    <Compile Include="BLL\SpecializationService.cs" />
     <Compile Include="Contact.aspx.cs">
       <DependentUpon>Contact.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -505,9 +519,13 @@
       <DependentUpon>Contact.aspx</DependentUpon>
     </Compile>
     <Compile Include="DAL\AppointmentRepository.cs" />
+    <Compile Include="DAL\AvailabilityRepository.cs" />
     <Compile Include="DAL\DoctorRepository.cs" />
+    <Compile Include="DAL\HospitalRepository.cs" />
     <Compile Include="DAL\PatientRepository.cs" />
+    <Compile Include="DAL\SpecializationRepository.cs" />
     <Compile Include="DAL\SqlHelper.cs" />
+    <Compile Include="Data\ClinicDbContext.cs" />
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -518,26 +536,51 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202511240711554_InitialCreate.cs" />
+    <Compile Include="Migrations\202511240711554_InitialCreate.Designer.cs">
+      <DependentUpon>202511240711554_InitialCreate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202511240924477_AddedSpecialization.cs" />
+    <Compile Include="Migrations\202511240924477_AddedSpecialization.Designer.cs">
+      <DependentUpon>202511240924477_AddedSpecialization.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Appointment.cs" />
     <Compile Include="Models\Doctor.cs" />
+    <Compile Include="Models\DoctorAvailability.cs" />
+    <Compile Include="Models\Hospital.cs" />
     <Compile Include="Models\Patient.cs" />
-
-    <Compile Include="Pages\Admin\AddDoctor.aspx.cs">
-      <DependentUpon>AddDoctor.aspx</DependentUpon>
+    <Compile Include="Models\Specialization.cs" />
+    <Compile Include="Models\User.cs" />
+    <Compile Include="Pages\Admin\ManageDoctors.aspx.cs">
       <SubType>ASPXCodeBehind</SubType>
+      <DependentUpon>ManageDoctors.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Pages\Admin\AddDoctor.aspx.designer.cs">
-      <DependentUpon>AddDoctor.aspx</DependentUpon>
+    <Compile Include="Pages\Admin\ManageDoctors.aspx.designer.cs">
+      <DependentUpon>ManageDoctors.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\ManageHospital.aspx.cs">
+      <SubType>ASPXCodeBehind</SubType>
+      <DependentUpon>ManageHospital.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\ManageHospital.aspx.designer.cs">
+      <DependentUpon>ManageHospital.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\ManageSpecializations.aspx.cs">
+      <SubType>ASPXCodeBehind</SubType>
+      <DependentUpon>ManageSpecializations.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\ManageSpecializations.aspx.designer.cs">
+      <DependentUpon>ManageSpecializations.aspx</DependentUpon>
     </Compile>
     <Compile Include="Pages\BookAppointment.aspx.cs">
       <DependentUpon>BookAppointment.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Pages\Doctors.aspx.cs">
-      <DependentUpon>Doctors.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
+    <Compile Include="Pages\BookAppointment.aspx.designer.cs">
+      <DependentUpon>BookAppointment.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Pages\RegisterPatient.aspx.cs">
+    <Compile Include="Pages\Admin\RegisterPatient.aspx.cs">
       <DependentUpon>RegisterPatient.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
@@ -586,6 +629,14 @@
       <DependentUpon>Web.config</DependentUpon>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\202511240711554_InitialCreate.resx">
+      <DependentUpon>202511240711554_InitialCreate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202511240924477_AddedSpecialization.resx">
+      <DependentUpon>202511240924477_AddedSpecialization.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
@@ -616,7 +667,10 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
+    <Error Condition="!Exists('packages\EntityFramework.6.5.1\build\EntityFramework.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\EntityFramework.6.5.1\build\EntityFramework.props'))" />
+    <Error Condition="!Exists('packages\EntityFramework.6.5.1\build\EntityFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\EntityFramework.6.5.1\build\EntityFramework.targets'))" />
   </Target>
+  <Import Project="packages\EntityFramework.6.5.1\build\EntityFramework.targets" Condition="Exists('packages\EntityFramework.6.5.1\build\EntityFramework.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
