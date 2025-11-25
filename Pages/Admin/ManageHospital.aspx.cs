@@ -6,7 +6,7 @@ using Durdans_WebForms_MVP.Models;
 
 namespace Durdans_WebForms_MVP.Pages.Admin
 {
-    public partial class AddHospital : System.Web.UI.Page
+    public partial class AddHospital : AdminBasePage
     {
         private HospitalService _hospitalService;
 

@@ -76,6 +76,12 @@ namespace Durdans_WebForms_MVP.Data
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Username)
                 .IsUnique();
+
+            // Configure User-Patient relationship (one-to-one optional)
+            // Patient has optional User, User has optional Patient
+            modelBuilder.Entity<Patient>()
+                .HasOptional(p => p.User)
+                .WithOptionalPrincipal(u => u.Patient);
         }
     }
 }

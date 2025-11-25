@@ -53,6 +53,29 @@ namespace Durdans_WebForms_MVP.BLL
             return _patientRepo.GetPatientById(id);
         }
 
+        /// <summary>
+        /// Gets a patient by name (used for matching logged-in user to patient record)
+        /// Note: This is a temporary solution. Ideally, User and Patient should be linked via UserId
+        /// </summary>
+        public Patient GetPatientByName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return null;
+            }
+
+            var patients = _patientRepo.GetAllPatients();
+            return patients.FirstOrDefault(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
+        /// Gets a patient by user ID (preferred method for user-patient linking)
+        /// </summary>
+        public Patient GetPatientByUserId(int userId)
+        {
+            return _patientRepo.GetPatientByUserId(userId);
+        }
+
         public void UpdatePatient(Patient patient)
         {
             if (patient.Id <= 0)
@@ -60,7 +83,40 @@ namespace Durdans_WebForms_MVP.BLL
                 throw new ArgumentException("Invalid patient ID.");
             }
 
+            // Validate updated data
+            if (string.IsNullOrWhiteSpace(patient.Name))
+            {
+                throw new ArgumentException("Patient name is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(patient.ContactNumber))
+            {
+                throw new ArgumentException("Contact number is required.");
+            }
+
+            if (patient.DateOfBirth >= DateTime.Now)
+            {
+                throw new ArgumentException("Date of birth must be in the past.");
+            }
+
             _patientRepo.UpdatePatient(patient);
+        }
+
+        public void DeletePatient(int patientId, AppointmentService appointmentService)
+        {
+            if (patientId <= 0)
+            {
+                throw new ArgumentException("Invalid patient ID.");
+            }
+
+            // Check if patient has appointments
+            var appointments = appointmentService.GetAppointmentsByPatient(patientId);
+            if (appointments != null && appointments.Any())
+            {
+                throw new InvalidOperationException($"Cannot delete patient. Patient has {appointments.Count} appointment(s). Please delete or cancel all appointments first.");
+            }
+
+            _patientRepo.DeletePatient(patientId);
         }
 
         public void Dispose()

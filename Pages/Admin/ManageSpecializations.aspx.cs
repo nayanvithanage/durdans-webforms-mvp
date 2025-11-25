@@ -6,7 +6,7 @@ using Durdans_WebForms_MVP.Models;
 
 namespace Durdans_WebForms_MVP.Pages.Admin
 {
-    public partial class ManageSpecializations : System.Web.UI.Page
+    public partial class ManageSpecializations : AdminBasePage
     {
         private SpecializationService _specializationService;
 
