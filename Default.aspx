@@ -70,10 +70,10 @@
                         <div class="card h-100 shadow-sm">
                             <div class="card-body">
                                 <h5 class="card-title">
-                                    <i class="bi bi-person-plus"></i> Register Patient
+                                    <i class="bi bi-person-plus"></i> Manage Patients
                                 </h5>
                                 <p class="card-text">Register a new patient in the system.</p>
-                                <a href="~/Pages/Admin/RegisterPatient.aspx" runat="server" class="btn btn-primary">
+                                <a href="~/Pages/Admin/ManagePatient.aspx" runat="server" class="btn btn-primary">
                                     Register Patient
                                 </a>
                             </div>

@@ -216,56 +216,6 @@ For an enterprise-grade Web Forms application in a hospital setting, the standar
 
 ---
 
-## 7. CI/CD Pipeline Strategy
-
-### 7.1 Overview
-*   **Source Control**: GitHub (Code repository).
-*   **CI/CD Orchestrator**: Azure DevOps (Pipelines).
-*   **Hosting**: Azure App Service (Web Apps).
-*   **Environments**: Development (Dev), Production (Prod).
-*   **Database Strategy**: Entity Framework Code First Automatic Migrations.
-
-### 7.2 Build Pipeline (CI)
-*   **Trigger**: Commit to `main` branch.
-*   **Agent Pool**: Azure Pipelines (Windows-latest).
-*   **Steps**:
-    1.  **Get Sources**: Checkout code from GitHub repository.
-    2.  **NuGet Restore**: Restore packages for the solution.
-    3.  **Build**: Build solution in `Release` configuration.
-    4.  **Test**: Run Unit/Integration tests (if applicable).
-    5.  **Publish**: Package the Web Forms application into a `.zip` artifact (Web Deploy package).
-    6.  **Artifact Upload**: Publish the build artifact for the Release pipeline.
-
-### 7.3 Release Pipeline (CD)
-*   **Artifact Source**: Output from Build Pipeline.
-*   **Stages**:
-
-    #### Stage 1: Development (Dev)
-    *   **Trigger**: Automatic (After successful Build).
-    *   **Steps**:
-        1.  **Deploy App**: Deploy web package to **Azure App Service (Dev Slot/Resource)**.
-        2.  **Database Migration**:
-            *   Use `Migrate.exe` (shipped with EF6) or a PowerShell script to run `Update-Database`.
-            *   Target: Dev Database.
-
-    #### Stage 2: Production (Prod)
-    *   **Trigger**: Pre-deployment approval required (Manual Gate).
-    *   **Steps**:
-        1.  **Deploy App**: Deploy web package to **Azure App Service (Prod Resource)**.
-        2.  **Database Migration**:
-            *   Execute migrations against Production Database.
-            *   *Safety Check*: Ensure backups are taken before migration.
-
-### 7.4 Configuration Management
-*   **Connection Strings**:
-    *   Do **not** store secrets in `web.config` in the repository.
-    *   Use **Azure App Service Configuration** settings to override `connectionStrings` at runtime.
-    *   Dev connection string -> Dev App Service Configuration.
-    *   Prod connection string -> Prod App Service Configuration.
-*   **Variable Groups**: Store non-secret environment variables in Azure DevOps Library.
-
----
-
 ## 6. Feature Implementation Details (Web Forms + Entity Framework)
 
 ### 6.1 Patient Management (`ManagePatient.aspx` - Single Page with Two Sections)
@@ -1150,3 +1100,54 @@ protected void Page_Load(object sender, EventArgs e)
 *   **Authentication**: Login page using `asp:Login` control backed by EF `User` entity (`context.Users`).
 *   **Master Page (`Site.Master`)**: Contains the Navigation Menu (`asp:Menu`) and Footer.
 *   **Error Handling**: Global `Application_Error` in `Global.asax` to log errors to database via EF or text file.
+
+
+## 7. CI/CD Pipeline Strategy
+
+### 7.1 Overview
+*   **Source Control**: GitHub (Code repository).
+*   **CI/CD Orchestrator**: Azure DevOps (Pipelines).
+*   **Hosting**: Azure App Service (Web Apps).
+*   **Environments**: Development (Dev), Production (Prod).
+*   **Database Strategy**: Entity Framework Code First Automatic Migrations.
+
+### 7.2 Build Pipeline (CI)
+*   **Trigger**: Commit to `main` branch.
+*   **Agent Pool**: Azure Pipelines (Windows-latest).
+*   **Steps**:
+    1.  **Get Sources**: Checkout code from GitHub repository.
+    2.  **NuGet Restore**: Restore packages for the solution.
+    3.  **Build**: Build solution in `Release` configuration.
+    4.  **Test**: Run Unit/Integration tests (if applicable).
+    5.  **Publish**: Package the Web Forms application into a `.zip` artifact (Web Deploy package).
+    6.  **Artifact Upload**: Publish the build artifact for the Release pipeline.
+
+### 7.3 Release Pipeline (CD)
+*   **Artifact Source**: Output from Build Pipeline.
+*   **Stages**:
+
+    #### Stage 1: Development (Dev)
+    *   **Trigger**: Automatic (After successful Build).
+    *   **Steps**:
+        1.  **Deploy App**: Deploy web package to **Azure App Service (Dev Slot/Resource)**.
+        2.  **Database Migration**:
+            *   Use `Migrate.exe` (shipped with EF6) or a PowerShell script to run `Update-Database`.
+            *   Target: Dev Database.
+
+    #### Stage 2: Production (Prod)
+    *   **Trigger**: Pre-deployment approval required (Manual Gate).
+    *   **Steps**:
+        1.  **Deploy App**: Deploy web package to **Azure App Service (Prod Resource)**.
+        2.  **Database Migration**:
+            *   Execute migrations against Production Database.
+            *   *Safety Check*: Ensure backups are taken before migration.
+
+### 7.4 Configuration Management
+*   **Connection Strings**:
+    *   Do **not** store secrets in `web.config` in the repository.
+    *   Use **Azure App Service Configuration** settings to override `connectionStrings` at runtime.
+    *   Dev connection string -> Dev App Service Configuration.
+    *   Prod connection string -> Prod App Service Configuration.
+*   **Variable Groups**: Store non-secret environment variables in Azure DevOps Library.
+
+---

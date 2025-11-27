@@ -43,6 +43,18 @@ body {
     border: none;
 }
 
+.alert-success {
+    color: white !important;
+}
+
+.alert-danger {
+    color: white !important;
+}
+
+.alert-warning {
+    color: white !important;
+}
+
 /* Pagination improvements */
 .pagination {
     margin-bottom: 0;
@@ -58,7 +70,7 @@ body {
 }
 
 /* Sidebar improvements */
-.sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link.active {
+.sidebar-dark-primary .nav-sidebar>.nav-item>.nav-link.active {
     background-color: rgba(255, 255, 255, 0.1);
     color: #fff;
 }
@@ -85,7 +97,7 @@ body {
     .content-header h1 {
         font-size: 1.5rem;
     }
-    
+
     .card {
         margin-bottom: 0.5rem;
     }
