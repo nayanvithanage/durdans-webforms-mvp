@@ -170,11 +170,42 @@ For an enterprise-grade Web Forms application in a hospital setting, the standar
 ---
 
 ## 4. Security Implementation
-*   **Authentication**: ASP.NET Forms Authentication.
-*   **Authorization**: Role-based access (e.g., `<location path="Admin"> <allow roles="Admin"/> </location>` in `web.config`).
-*   **Input Sanitization**: 
-    *   **SQL Injection Prevention**: Entity Framework automatically uses parameterized queries.
-    *   **XSS Prevention**: Use `Server.HtmlEncode()` for user input display and validation controls.
+
+### 4.1 Authentication
+*   **Mechanism**: Custom Session-based Authentication.
+*   **Session Management**:
+    *   Upon successful login, `Session["UserId"]`, `Session["Username"]`, and `Session["UserRole"]` are populated.
+    *   Session timeout is controlled via `web.config` (standard ASP.NET behavior).
+*   **Password Security**:
+    *   **Hashing Algorithm**: SHA-256 (implemented in `UserService.cs`).
+    *   **Salt**: Currently using simple hashing; recommended to upgrade to BCrypt or PBKDF2 with per-user salt for production.
+    *   Passwords are **never** stored in plain text.
+
+### 4.2 Authorization (Role-Based Access Control - RBAC)
+*   **Roles**: `Admin`, `Patient`.
+*   **UI Level**:
+    *   `Site.Master.cs` dynamically hides/shows navigation items based on `Session["UserRole"]`.
+    *   Guest users see only Login/Register links.
+*   **Page Level**:
+    *   **BasePage Architecture**:
+        *   `BasePage`: Abstract base class that checks for valid session (`Session["UserId"]`). Redirects to Login if session is null.
+        *   `AdminBasePage`: Inherits from `BasePage`. Enforces `AllowedRoles = ["Admin"]`. Redirects to Default/Login if user is not an Admin.
+    *   **Implementation**: All Admin pages (e.g., `ManageDoctors.aspx`) inherit from `AdminBasePage`, ensuring secure access by default.
+
+### 4.3 Data Security
+*   **SQL Injection Prevention**:
+    *   All database interactions use **Entity Framework 6**.
+    *   EF automatically parameterizes all queries, neutralizing SQL injection attacks.
+*   **Sensitive Data**:
+    *   Connection strings are stored in `web.config` (should be encrypted in production).
+
+### 4.4 Input Validation & Sanitization
+*   **Server-Side Validation**:
+    *   ASP.NET Validation Controls (`RequiredFieldValidator`, `RegularExpressionValidator`, `CompareValidator`) used on all forms.
+    *   Business Logic Layer (`PatientService`, `DoctorService`) performs additional data integrity checks (e.g., preventing past dates for DOB, duplicate records).
+*   **XSS Prevention**:
+    *   ASP.NET Web Forms automatically encodes output for most server controls (`<asp:Label>`, `<asp:TextBox>`).
+    *   Explicit use of `Server.HtmlEncode()` recommended for any direct HTML output.
 
 ## 5. Deployment
 *   **Server**: IIS (Internet Information Services).
@@ -1069,3 +1100,54 @@ protected void Page_Load(object sender, EventArgs e)
 *   **Authentication**: Login page using `asp:Login` control backed by EF `User` entity (`context.Users`).
 *   **Master Page (`Site.Master`)**: Contains the Navigation Menu (`asp:Menu`) and Footer.
 *   **Error Handling**: Global `Application_Error` in `Global.asax` to log errors to database via EF or text file.
+
+
+## 7. CI/CD Pipeline Strategy
+
+### 7.1 Overview
+*   **Source Control**: GitHub (Code repository).
+*   **CI/CD Orchestrator**: Azure DevOps (Pipelines).
+*   **Hosting**: Azure App Service (Web Apps).
+*   **Environments**: Development (Dev), Production (Prod).
+*   **Database Strategy**: Entity Framework Code First Automatic Migrations.
+
+### 7.2 Build Pipeline (CI)
+*   **Trigger**: Commit to `main` branch.
+*   **Agent Pool**: Azure Pipelines (Windows-latest).
+*   **Steps**:
+    1.  **Get Sources**: Checkout code from GitHub repository.
+    2.  **NuGet Restore**: Restore packages for the solution.
+    3.  **Build**: Build solution in `Release` configuration.
+    4.  **Test**: Run Unit/Integration tests (if applicable).
+    5.  **Publish**: Package the Web Forms application into a `.zip` artifact (Web Deploy package).
+    6.  **Artifact Upload**: Publish the build artifact for the Release pipeline.
+
+### 7.3 Release Pipeline (CD)
+*   **Artifact Source**: Output from Build Pipeline.
+*   **Stages**:
+
+    #### Stage 1: Development (Dev)
+    *   **Trigger**: Automatic (After successful Build).
+    *   **Steps**:
+        1.  **Deploy App**: Deploy web package to **Azure App Service (Dev Slot/Resource)**.
+        2.  **Database Migration**:
+            *   Use `Migrate.exe` (shipped with EF6) or a PowerShell script to run `Update-Database`.
+            *   Target: Dev Database.
+
+    #### Stage 2: Production (Prod)
+    *   **Trigger**: Pre-deployment approval required (Manual Gate).
+    *   **Steps**:
+        1.  **Deploy App**: Deploy web package to **Azure App Service (Prod Resource)**.
+        2.  **Database Migration**:
+            *   Execute migrations against Production Database.
+            *   *Safety Check*: Ensure backups are taken before migration.
+
+### 7.4 Configuration Management
+*   **Connection Strings**:
+    *   Do **not** store secrets in `web.config` in the repository.
+    *   Use **Azure App Service Configuration** settings to override `connectionStrings` at runtime.
+    *   Dev connection string -> Dev App Service Configuration.
+    *   Prod connection string -> Prod App Service Configuration.
+*   **Variable Groups**: Store non-secret environment variables in Azure DevOps Library.
+
+---
