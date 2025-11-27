@@ -147,7 +147,7 @@ namespace Durdans_WebForms_MVP.Pages.Admin
                     int doctorId = _doctorService.RegisterDoctor(doctor, hospitalIds);
 
                     lblDoctorMessage.Text = $"Doctor registered successfully! ID: {doctorId}";
-                    lblDoctorMessage.CssClass = "text-success alert alert-success";
+                    lblDoctorMessage.CssClass = "text-white alert alert-success";
 
                     // 4. Clear form and reload lists
                     txtName.Text = "";
@@ -201,7 +201,7 @@ namespace Durdans_WebForms_MVP.Pages.Admin
 
                     _doctorService.UpdateDoctor(doctor);
                     lblDoctorMessage.Text = "Doctor updated successfully!";
-                    lblDoctorMessage.CssClass = "text-success alert alert-success";
+                    lblDoctorMessage.CssClass = "text-white alert alert-success";
                 }
 
                 gvDoctors.EditIndex = -1;
@@ -222,7 +222,7 @@ namespace Durdans_WebForms_MVP.Pages.Admin
                 int doctorId = (int)gvDoctors.DataKeys[e.RowIndex].Value;
                 _doctorService.DeleteDoctor(doctorId);
                 lblDoctorMessage.Text = "Doctor deleted successfully!";
-                lblDoctorMessage.CssClass = "text-success alert alert-success";
+                lblDoctorMessage.CssClass = "text-white alert alert-success";
                 LoadDoctorsGrid();
                 LoadDoctors(); // Reload dropdown
             }
@@ -306,7 +306,7 @@ namespace Durdans_WebForms_MVP.Pages.Admin
                     }
 
                     lblAvailabilityMessage.Text = "Availability added successfully!";
-                    lblAvailabilityMessage.CssClass = "text-success alert alert-success";
+                    lblAvailabilityMessage.CssClass = "text-white alert alert-success";
 
                     // Reload grid
                     LoadAvailabilityGrid(availability.DoctorId);
@@ -389,7 +389,7 @@ namespace Durdans_WebForms_MVP.Pages.Admin
                 _doctorService.DeleteAvailability(availabilityId);
                 
                 lblAvailabilityMessage.Text = "Availability deleted successfully!";
-                lblAvailabilityMessage.CssClass = "text-success alert alert-success";
+                lblAvailabilityMessage.CssClass = "text-white alert alert-success";
 
                 if (!string.IsNullOrEmpty(ddlDoctorSelect.SelectedValue))
                 {

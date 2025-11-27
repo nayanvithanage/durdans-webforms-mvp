@@ -51,7 +51,7 @@ namespace Durdans_WebForms_MVP.Pages.Admin
                     int newId = _specializationService.AddSpecialization(specialization);
 
                     lblMessage.Text = $"Specialization added successfully! ID: {newId}";
-                    lblMessage.CssClass = "text-success alert alert-success";
+                    lblMessage.CssClass = "text-white alert alert-success";
 
                     // Clear form
                     txtName.Text = "";
@@ -105,7 +105,7 @@ namespace Durdans_WebForms_MVP.Pages.Admin
                     _specializationService.UpdateSpecialization(specialization);
 
                     lblMessage.Text = "Specialization updated successfully!";
-                    lblMessage.CssClass = "text-success alert alert-success";
+                    lblMessage.CssClass = "text-white alert alert-success";
                 }
 
                 gvSpecializations.EditIndex = -1;
@@ -131,7 +131,7 @@ namespace Durdans_WebForms_MVP.Pages.Admin
                 _specializationService.DeleteSpecialization(specializationId);
 
                 lblMessage.Text = "Specialization deactivated successfully!";
-                lblMessage.CssClass = "text-success alert alert-success";
+                lblMessage.CssClass = "text-white alert alert-success";
 
                 LoadSpecializations();
             }

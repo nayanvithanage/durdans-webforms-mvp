@@ -266,7 +266,7 @@ namespace Durdans_WebForms_MVP.Pages
                         _patientService.UpdatePatient(patient);
 
                         lblMessage.Text = "Patient updated successfully!";
-                        lblMessage.CssClass = "text-success alert alert-success";
+                        lblMessage.CssClass = "text-white alert alert-success";
 
                         _editingPatientId = null;
                         ViewState["EditingPatientId"] = null;
@@ -291,7 +291,7 @@ namespace Durdans_WebForms_MVP.Pages
                     _patientService.DeletePatient(patientId, _appointmentService);
 
                     lblMessage.Text = "Patient deleted successfully!";
-                    lblMessage.CssClass = "text-success alert alert-success";
+                    lblMessage.CssClass = "text-white alert alert-success";
 
                     // Reload patients
                     LoadPatients();

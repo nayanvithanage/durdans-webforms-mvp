@@ -87,7 +87,8 @@
                 <asp:GridView ID="gvDoctors" runat="server" CssClass="table table-striped table-bordered"
                     AutoGenerateColumns="False" DataKeyNames="Id" OnRowEditing="gvDoctors_RowEditing"
                     OnRowCancelingEdit="gvDoctors_RowCancelingEdit" OnRowUpdating="gvDoctors_RowUpdating"
-                    OnRowDeleting="gvDoctors_RowDeleting" EmptyDataText="No doctors found. Register one above.">
+                    OnRowDeleting="gvDoctors_RowDeleting" OnRowDataBound="gvDoctors_RowDataBound"
+                    EmptyDataText="No doctors found. Register one above.">
                     <Columns>
                         <asp:BoundField DataField="Id" HeaderText="ID" ReadOnly="True" />
                         <asp:BoundField DataField="Name" HeaderText="Name" />
